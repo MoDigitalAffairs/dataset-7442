@@ -78,18 +78,23 @@ jobs:
 #          curl -I --connect-timeout 10 https://data.moi.gov.tw || echo "連線失敗"
       - name: Run Docker container
         run: |
-          # 啟動 Tor 容器並配置台灣出口節點
+          # 建立 Tor 配置
+          cat > torrc << EOF
+          SOCKSPort 0.0.0.0:9050
+          ExitNodes {tw}
+          StrictNodes 1
+          EOF
+          # 啟動官方 Tor 容器
           docker run -d --name tor-proxy \
-            -p 9050:9050 \
-            dperson/torproxy -e "ExitNodes {tw}" -e "StrictNodes 1"
+          -v $(pwd)/torrc:/etc/tor/torrc:ro \
+          thetorproject/tor:latest
           # 等待 Tor 啟動
-          sleep 30
-          # 執行應用容器,使用 Tor 作為代理
+          sleep 60
+          # 執行應用
           docker run --rm \
-            --network container:tor-proxy \
-            -e JAVA_TOOL_OPTIONS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=9050 -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=9050" \
-            ghcr.io/${{ steps.repo.outputs.name }}:latest          
-          # 停止 Tor 容器
-          docker stop tor-proxy
-          docker rm tor-proxy
+          --network container:tor-proxy \
+          -e JAVA_TOOL_OPTIONS="-DsocksProxyHost=127.0.0.1 -DsocksProxyPort=9050" \
+          ghcr.io/${{ steps.repo.outputs.name }}:latest
+          # 清理
+          docker stop tor-proxy && docker rm tor-proxy
         continue-on-error: true
