@@ -72,5 +72,9 @@ jobs:
       - name: Extract repository name
         id: repo
         run: echo "name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      - name: 測試連線
+        run: |
+          echo "測試 data.moi.gov.tw 連線…"
+          curl -I --connect-timeout 10 https://data.moi.gov.tw || echo "連線失敗"
       - name: Run Docker container
         run: docker run --rm ghcr.io/${{ steps.repo.outputs.name }}:latest
