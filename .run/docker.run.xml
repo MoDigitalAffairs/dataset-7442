@@ -12,6 +12,26 @@
           </list>
         </option>
         <option name="containerName" value="dataset-7442" />
+        <option name="envVars">
+          <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="CONTENT_LENGTH" />
+              <option name="value" value="37623810" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="ETAG" />
+              <option name="value" value="&quot;1dba9e0a7fd1c4d&quot;" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="LAST_MODIFIED" />
+              <option name="value" value="Thu, 10 Apr 2025 06:20:29 GMT" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="SPRING_PROFILES_ACTIVE" />
+              <option name="value" value="dev" />
+            </DockerEnvVarImpl>
+          </list>
+        </option>
         <option name="sourceFilePath" value="Dockerfile" />
       </settings>
     </deployment>

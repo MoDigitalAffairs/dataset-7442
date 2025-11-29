@@ -9,29 +9,59 @@
 	</parent>
 	<groupId>tw.gov.data</groupId>
 	<artifactId>dataset-7442</artifactId>
-	<version>2025.11.23-SNAPSHOT</version>
+	<version>2025.11.28-SNAPSHOT</version>
 	<name>直轄市、縣市界線(TWD97經緯度)</name>
 	<description>我國各直轄市以及縣(市)行政區域界線圖資</description>
 	<url>https://data.gov.tw/dataset/7442</url>
-	<licenses>
-		<license/>
-	</licenses>
 	<developers>
-		<developer/>
+		<developer>
+			<id>codethefuckup</id>
+			<name>cOdEthEfUckUp</name>
+			<email>178927409oT+codethefuckup@users.noreply.github.com</email>
+			<roles>
+				<role>developer</role>
+				<role>maintainer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
 	</developers>
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<connection>scm:git:git@github.com:cOdEthEfUckUp/tw.gov.data.dataset-7442.git</connection>
+		<developerConnection>scm:git:git@github.com:cOdEthEfUckUp/tw.gov.data.dataset-7442.git</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/cOdEthEfUckUp/tw.gov.data.dataset-7442</url>
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<maven.compiler.release>17</maven.compiler.release>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.geotools</groupId>
+				<artifactId>gt-bom</artifactId>
+				<version>34.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-referencing</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-shapefile</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -58,6 +88,19 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>osgeo</id>
+			<name>OSGeo Release Repository</name>
+			<url>https://repo.osgeo.org/repository/release/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+	</repositories>
 	<build>
 		<finalName>${env.GITHUB_SHA}</finalName>
 		<plugins>
