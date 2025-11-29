@@ -78,23 +78,43 @@ jobs:
 #          curl -I --connect-timeout 10 https://data.moi.gov.tw || echo "連線失敗"
       - name: Run Docker container
         run: |
-          # 建立 Tor 配置
-          cat > torrc << EOF
+          # 建立 Tor 配置檔
+          mkdir -p tor-config
+          cat > tor-config/torrc << EOF
           SOCKSPort 0.0.0.0:9050
-          ExitNodes {tw}
-          StrictNodes 1
+          ExitNodes {tw},{jp},{kr},{sg}
+          StrictNodes 0
+          Log notice stdout
           EOF
-          # 啟動官方 Tor 容器
+          # 啟動 Tor 容器 (使用 goldy/tor-hidden-service 映像)
           docker run -d --name tor-proxy \
-          -v $(pwd)/torrc:/etc/tor/torrc:ro \
-          thetorproject/tor:latest
-          # 等待 Tor 啟動
+            -v $(pwd)/tor-config:/etc/tor:ro \
+            goldy/tor-hidden-service:latest
+          # 等待 Tor 完全啟動並建立電路
+          echo "等待 Tor 建立電路..."
           sleep 60
-          # 執行應用
+          # 檢查 Tor 容器狀態
+          echo "Tor 容器狀態:"
+          docker ps | grep tor-proxy || docker ps -a | grep tor-proxy
+          echo "Tor 日誌:"
+          docker logs tor-proxy | tail -20
+          # 測試 Tor 連線
+          echo "測試 Tor 連線..."
+          docker run --rm --network container:tor-proxy \
+            curlimages/curl:latest \
+            --socks5-hostname 127.0.0.1:9050 \
+            https://api.ipify.org || echo "Tor 連線測試失敗"
+          # 執行應用容器
+          echo "執行應用程式..."
           docker run --rm \
-          --network container:tor-proxy \
-          -e JAVA_TOOL_OPTIONS="-DsocksProxyHost=127.0.0.1 -DsocksProxyPort=9050" \
-          ghcr.io/${{ steps.repo.outputs.name }}:latest
-          # 清理
-          docker stop tor-proxy && docker rm tor-proxy
+            --network container:tor-proxy \
+            -e JAVA_TOOL_OPTIONS="-DsocksProxyHost=127.0.0.1 -DsocksProxyPort=9050" \
+            ghcr.io/${{ steps.repo.outputs.name }}:latest || {
+              echo "應用執行失敗,完整 Tor 日誌:"
+              docker logs tor-proxy
+              exit 1
+            }
+          # 清理 Tor 容器
+          docker stop tor-proxy 2>/dev/null || true
+          docker rm tor-proxy 2>/dev/null || true
         continue-on-error: true
