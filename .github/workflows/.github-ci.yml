@@ -50,6 +50,8 @@ jobs:
         with:
           context: .
           push: true
+          build-args: |
+            FINAL_NAME=${{ github.sha }}
           tags: |
             ghcr.io/${{ steps.repo.outputs.name }}:latest
             ghcr.io/${{ steps.repo.outputs.name }}:${{ github.ref_name }}
