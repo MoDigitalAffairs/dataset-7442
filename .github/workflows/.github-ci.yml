@@ -72,10 +72,6 @@ jobs:
       - name: Extract repository name
         id: repo
         run: echo "name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-#      - name: 測試連線
-#        run: |
-#          echo "測試 data.moi.gov.tw 連線…"
-#          curl -I --connect-timeout 10 https://data.moi.gov.tw || echo "連線失敗"
       - name: Run Docker container
         run: |
           # 建立 Tor Dockerfile
@@ -83,7 +79,7 @@ jobs:
           FROM alpine:latest
           RUN apk add --no-cache tor
           RUN echo "SOCKSPort 0.0.0.0:9050" > /etc/tor/torrc && \
-              echo "ExitNodes {tw},{jp},{kr},{sg}" >> /etc/tor/torrc && \
+              echo "ExitNodes {tw}" >> /etc/tor/torrc && \
               echo "StrictNodes 0" >> /etc/tor/torrc && \
               echo "Log notice stdout" >> /etc/tor/torrc
           CMD ["tor", "-f", "/etc/tor/torrc"]
@@ -108,6 +104,9 @@ jobs:
             curlimages/curl:latest \
             --socks5-hostname 127.0.0.1:9050 \
             https://api.ipify.org || echo "Tor 連線測試失敗"
+          # 測試連線
+          echo "測試 data.moi.gov.tw 連線…"
+          curl -I --connect-timeout 10 https://data.moi.gov.tw || echo "連線失敗"
           # 執行應用容器
           echo "執行應用程式..."
           docker run --rm \
