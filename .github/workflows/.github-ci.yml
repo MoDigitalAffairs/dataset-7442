@@ -78,18 +78,22 @@ jobs:
 #          curl -I --connect-timeout 10 https://data.moi.gov.tw || echo "連線失敗"
       - name: Run Docker container
         run: |
-          # 建立 Tor 配置檔
-          mkdir -p tor-config
-          cat > tor-config/torrc << EOF
-          SOCKSPort 0.0.0.0:9050
-          ExitNodes {tw},{jp},{kr},{sg}
-          StrictNodes 0
-          Log notice stdout
+          # 建立 Tor Dockerfile
+          cat > Dockerfile.tor << 'EOF'
+          FROM alpine:latest
+          RUN apk add --no-cache tor
+          RUN echo "SOCKSPort 0.0.0.0:9050" > /etc/tor/torrc && \
+              echo "ExitNodes {tw},{jp},{kr},{sg}" >> /etc/tor/torrc && \
+              echo "StrictNodes 0" >> /etc/tor/torrc && \
+              echo "Log notice stdout" >> /etc/tor/torrc
+          CMD ["tor", "-f", "/etc/tor/torrc"]
           EOF
-          # 啟動 Tor 容器 (使用 goldy/tor-hidden-service 映像)
-          docker run -d --name tor-proxy \
-            -v $(pwd)/tor-config:/etc/tor:ro \
-            goldy/tor-hidden-service:latest
+          # 建置 Tor 容器映像
+          echo "建置 Tor 容器..."
+          docker build -f Dockerfile.tor -t local-tor .
+          # 啟動 Tor 容器
+          echo "啟動 Tor 容器..."
+          docker run -d --name tor-proxy local-tor
           # 等待 Tor 完全啟動並建立電路
           echo "等待 Tor 建立電路..."
           sleep 60
@@ -117,4 +121,5 @@ jobs:
           # 清理 Tor 容器
           docker stop tor-proxy 2>/dev/null || true
           docker rm tor-proxy 2>/dev/null || true
+          rm -f Dockerfile.tor
         continue-on-error: true
